@@ -55,7 +55,7 @@ public class TokenCredentials implements ICredentials {
      */
     public void authenticate(HttpRequest req) {
         if (token != null) {
-            req.addHeader("Cookie","JSESSIONID="+token+";");
+            req.addHeader("Cookie", "JSESSIONID="+token+";");
         }
     }
 
@@ -71,11 +71,11 @@ public class TokenCredentials implements ICredentials {
     public void initialize(RestClient client) throws JiraException {
         if (token==null) {
             try {
-                JSONObject req = new JSONObject();
+            	JSONObject req = new JSONObject();
                 req.put("username", username);
                 req.put("password", password);
-               JSON json = client.post(Resource.getAuthUri() + "session", req);
-               System.out.println(json.toString());
+                JSON json = client.post(Resource.getAuthUri() + "session", req);
+                System.out.println(json.toString());
             } catch (Exception ex) {
                 throw new JiraException("Failed to login", ex);
             }
@@ -96,4 +96,3 @@ public class TokenCredentials implements ICredentials {
         return token;
     }
 }
-

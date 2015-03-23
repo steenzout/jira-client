@@ -35,8 +35,8 @@ public class WorkLog extends Resource {
     private Date created = null;
     private Date updated = null;
     private User updatedAuthor = null;
-    private Date started = null;
-    private String timeSpent = null;
+    //private Date started = null;
+    //private String timeSpent = null;
     private int timeSpentSeconds = 0;
 
     /**
@@ -53,7 +53,7 @@ public class WorkLog extends Resource {
     }
 
     private void deserialise(JSONObject json) {
-        Map map = json;
+        Map<?, ?> map = json;
 
         self = Field.getString(map.get("self"));
         id = Field.getString(map.get("id"));
@@ -62,8 +62,8 @@ public class WorkLog extends Resource {
         created = Field.getDate(map.get("created"));
         updated = Field.getDate(map.get("updated"));
         updatedAuthor = Field.getResource(User.class, map.get("updatedAuthor"), restclient);
-        started = Field.getDate(map.get("started"));
-        timeSpent = Field.getString(map.get("timeSpent"));
+        //started = Field.getDate(map.get("started"));
+        //timeSpent = Field.getString(map.get("timeSpent"));
         timeSpentSeconds = Field.getInteger(map.get("timeSpentSeconds"));
     }
 

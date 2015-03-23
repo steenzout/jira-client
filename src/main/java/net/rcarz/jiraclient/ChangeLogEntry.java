@@ -65,7 +65,7 @@ public class ChangeLogEntry extends Resource {
      * @param json the json payload
      */
     private void deserialise(JSONObject json) {
-        Map map = json;
+        Map<?, ?> map = json;
 
         id = Field.getString(map.get("id"));
         author = Field.getResource(User.class, map.get("author"), restclient);

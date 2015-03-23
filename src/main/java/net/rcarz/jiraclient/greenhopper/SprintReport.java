@@ -19,16 +19,13 @@
 
 package net.rcarz.jiraclient.greenhopper;
 
-import net.rcarz.jiraclient.Field;
-import net.rcarz.jiraclient.Issue;
-import net.rcarz.jiraclient.JiraException;
-import net.rcarz.jiraclient.RestClient;
-
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.rcarz.jiraclient.JiraException;
+import net.rcarz.jiraclient.RestClient;
 import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 
@@ -62,7 +59,7 @@ public class SprintReport {
     }
 
     private void deserialise(JSONObject json) {
-        Map map = json;
+        Map<?, ?> map = json;
 
         sprint = GreenHopperField.getResource(Sprint.class, map.get("sprint"), restclient);
         completedIssues = GreenHopperField.getResourceArray(
@@ -110,7 +107,12 @@ public class SprintReport {
         try {
             URI reporturi = restclient.buildURI(
                 GreenHopperResource.RESOURCE_URI + "rapid/charts/sprintreport",
-                new HashMap<String, String>() {{
+                new HashMap<String, String>() {/**
+					 * 
+					 */
+					private static final long serialVersionUID = 1L;
+
+				{
                     put("rapidViewId", Integer.toString(rvId));
                     put("sprintId", Integer.toString(sprintId));
                 }});

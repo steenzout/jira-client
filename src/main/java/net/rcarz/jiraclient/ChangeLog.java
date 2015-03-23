@@ -51,7 +51,7 @@ public class ChangeLog extends Resource {
      * @param json the json payload
      */
     private void deserialise(JSONObject json) {
-        Map map = json;
+        Map<?, ?> map = json;
 
         entries = Field.getResourceArray(ChangeLogEntry.class, map.get(
                 Field.CHANGE_LOG_ENTRIES), restclient);

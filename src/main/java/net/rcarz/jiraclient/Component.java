@@ -19,10 +19,8 @@
 
 package net.rcarz.jiraclient;
 
-import java.util.HashMap;
 import java.util.Map;
 
-import net.rcarz.jiraclient.Issue.FluentCreate;
 import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 
@@ -148,7 +146,7 @@ public class Component extends Resource {
     }
 
     private void deserialise(JSONObject json) {
-        Map map = json;
+        Map<?, ?> map = json;
 
         self = Field.getString(map.get("self"));
         id = Field.getString(map.get("id"));

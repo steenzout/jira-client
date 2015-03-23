@@ -29,7 +29,6 @@ import java.util.Map;
  */
 public class Watches extends Resource {
 
-    private String name = null;
     private int watchCount = 0;
     private boolean isWatching = false;
 
@@ -47,7 +46,7 @@ public class Watches extends Resource {
     }
 
     private void deserialise(JSONObject json) {
-        Map map = json;
+        Map<?, ?> map = json;
 
         self = Field.getString(map.get("self"));
         id = Field.getString(map.get("id"));

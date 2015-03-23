@@ -40,14 +40,14 @@ public class EstimateStatistic {
      * @param json JSON payload
      */
     protected EstimateStatistic(JSONObject json) {
-        Map map = json;
+        Map<?, ?> map = json;
 
         statFieldId = Field.getString(map.get("statFieldId"));
 
         if (map.containsKey("statFieldValue") &&
             map.get("statFieldValue") instanceof JSONObject) {
 
-            Map val = (Map)json.get("statFieldValue");
+            Map<?, ?> val = (Map<?, ?>)json.get("statFieldValue");
 
             statFieldValue = Field.getDouble(val.get("value"));
             statFieldText = Field.getString(val.get("text"));

@@ -1,9 +1,7 @@
 package net.rcarz.jiraclient;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 
 import net.sf.json.JSONArray;
@@ -11,7 +9,6 @@ import net.sf.json.JSONObject;
 
 public class IssueHistory extends Resource {
 
-    private static final long serialVersionUID = 1L;
     private User user;
     private ArrayList<IssueHistoryItem> changes;
     private Date created;
@@ -40,7 +37,7 @@ public class IssueHistory extends Resource {
     }
 
     private void deserialise(RestClient restclient, JSONObject json) {
-        Map map = json;
+        Map<?, ?> map = json;
         self = Field.getString(map.get("self"));
         id = Field.getString(map.get("id"));
         user = new User(restclient,(JSONObject)map.get("author"));

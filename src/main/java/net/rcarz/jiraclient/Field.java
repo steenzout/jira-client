@@ -183,7 +183,7 @@ public final class Field {
         List<Comment> results = new ArrayList<Comment>();
 
         if (c instanceof JSONObject && !((JSONObject)c).isNullObject())
-            results = getResourceArray(Comment.class, ((Map)c).get("comments"), restclient);
+            results = getResourceArray(Comment.class, ((Map<?, ?>)c).get("comments"), restclient);
 
         return results;
     }
@@ -200,7 +200,7 @@ public final class Field {
         List<WorkLog> results = new ArrayList<WorkLog>();
 
         if (c instanceof JSONObject && !((JSONObject)c).isNullObject())
-            results = getResourceArray(WorkLog.class, ((Map)c).get("worklogs"), restclient);
+            results = getResourceArray(WorkLog.class, ((Map<?, ?>)c).get("worklogs"), restclient);
 
         return results;
     }
@@ -305,8 +305,8 @@ public final class Field {
         Map<TK, TV> result = new HashMap<TK, TV>();
 
         if (m instanceof JSONObject && !((JSONObject)m).isNullObject()) {
-            for (Object k : ((Map)m).keySet()) {
-                Object v = ((Map)m).get(k);
+            for (Object k : ((Map<?, ?>)m).keySet()) {
+                Object v = ((Map<?, ?>)m).get(k);
 
                 if (k.getClass() == keytype && v.getClass() == valtype)
                     result.put((TK)k, (TV)v);
@@ -473,7 +473,7 @@ public final class Field {
         if (editmeta.isNullObject() || !editmeta.containsKey(name))
             throw new JiraException("Field '" + name + "' does not exist or read-only");
 
-        Map f = (Map)editmeta.get(name);
+        Map<?, ?> f = (Map<?, ?>)editmeta.get(name);
         Meta m = new Meta();
 
         m.required = Field.getBoolean(f.get("required"));
@@ -482,7 +482,7 @@ public final class Field {
         if (!f.containsKey("schema"))
             throw new JiraException("Field '" + name + "' is missing schema metadata");
 
-        Map schema = (Map)f.get("schema");
+        Map<?, ?> schema = (Map<?, ?>)f.get("schema");
 
         m.type = Field.getString(schema.get("type"));
         m.items = Field.getString(schema.get("items"));
@@ -516,7 +516,7 @@ public final class Field {
      *
      * @return a JSON-encoded array of items
      */
-    public static JSONArray toArray(Iterable iter, String type) throws JiraException {
+    public static JSONArray toArray(Iterable<?> iter, String type) throws JiraException {
         JSONArray results = new JSONArray();
 
         if (type == null)
@@ -580,11 +580,11 @@ public final class Field {
 
         if (m.type.equals("array")) {
             if (value == null)
-                value = new ArrayList();
+                value = new ArrayList<Object>();
             else if (!(value instanceof Iterable))
                 throw new JiraException("Field expects an Iterable value");
 
-            return toArray((Iterable)value, m.items);
+            return toArray((Iterable<?>)value, m.items);
         } else if (m.type.equals("date")) {
             if (value == null)
                 return JSONNull.getInstance();
@@ -632,7 +632,7 @@ public final class Field {
             if (value == null)
                 return "";
             else if (value instanceof List)
-                return toJsonMap((List)value);
+                return toJsonMap((List<?>)value);
             else if (value instanceof ValueTuple) {
                 JSONObject json = new JSONObject();
                 ValueTuple tuple = (ValueTuple)value;
@@ -665,7 +665,7 @@ public final class Field {
      *
      * @return a JSON-encoded map
      */
-    public static Object toJsonMap(List list) {
+    public static Object toJsonMap(List<?> list) {
         JSONObject json = new JSONObject();
 
         for (Object item : list) {

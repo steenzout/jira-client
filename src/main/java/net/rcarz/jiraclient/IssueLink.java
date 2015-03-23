@@ -47,7 +47,7 @@ public class IssueLink extends Resource {
     }
 
     private void deserialise(JSONObject json) {
-        Map map = json;
+        Map<?, ?> map = json;
 
         self = Field.getString(map.get("self"));
         id = Field.getString(map.get("id"));

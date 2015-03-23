@@ -24,7 +24,8 @@ public class IssueHistoryItem extends Resource {
     }
 
     private void deserialise(RestClient restclient, JSONObject json) {
-        Map map = json;
+        Map<?, ?> map = json;
+        
         self = Field.getString(map.get("self"));
         id = Field.getString(map.get("id"));
         field = Field.getString(map.get("field"));

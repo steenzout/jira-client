@@ -66,7 +66,7 @@ public class Backlog {
     }
 
     private void deserialise(JSONObject json) {
-        Map map = json;
+        Map<?, ?> map = json;
 
         issues = GreenHopperField.getResourceArray(
             SprintIssue.class,
@@ -90,14 +90,14 @@ public class Backlog {
         queryResultLimit = Field.getInteger(map.get("queryResultLimit"));
 
         if (map.containsKey("epicData") && map.get("epicData") instanceof JSONObject) {
-            Map epicData = (Map)map.get("epicData");
+            Map<?, ?> epicData = (Map<?, ?>)map.get("epicData");
 
             epics = GreenHopperField.getResourceArray(Epic.class, epicData.get("epics"), restclient);
             canEditEpics = Field.getBoolean(epicData.get("canEditEpics"));
         }
 
         if (map.containsKey("versionData") && map.get("versionData") instanceof JSONObject) {
-            Map verData = (JSONObject)map.get("versionData");
+            Map<?, ?> verData = (JSONObject)map.get("versionData");
 
             if (verData.containsKey("versionsPerProject") &&
                 verData.get("versionsPerProject") instanceof JSONObject) {

@@ -75,7 +75,7 @@ public class ChangeLogItem extends Resource {
      * @param json the json payload
      */
     private void deserialise(JSONObject json) {
-        Map map = json;
+        Map<?, ?> map = json;
 
         field = Field.getString(map.get("field"));
         fieldType = Field.getString(map.get("fieldtype"));

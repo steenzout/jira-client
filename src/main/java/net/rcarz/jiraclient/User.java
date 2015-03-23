@@ -78,7 +78,7 @@ public class User extends Resource {
     }
 
     private void deserialise(JSONObject json) {
-        Map map = json;
+        Map<?, ?> map = json;
 
         self = Field.getString(map.get("self"));
         id = Field.getString(map.get("id"));
@@ -95,7 +95,7 @@ public class User extends Resource {
      * @param map JSON object for the User
      * @return String email address of the JIRA user.
      */
-    private String getEmailFromMap(Map map) {
+    private String getEmailFromMap(Map<?, ?> map) {
         if (map.containsKey("email")) {
             return Field.getString(map.get("email"));
         } else {

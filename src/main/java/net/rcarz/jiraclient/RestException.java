@@ -19,14 +19,16 @@
 
 package net.rcarz.jiraclient;
 
-import java.lang.Throwable;
-
 /**
  * An exception for JIRA REST errors.
  */
 public class RestException extends Exception {
 
-    private int status;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private int status;
     private String result;
 
     public RestException(String msg, int status, String result) {

@@ -24,9 +24,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.Map;
 
 import net.sf.json.JSON;
@@ -39,6 +39,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
+import org.apache.http.auth.AuthenticationException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
@@ -48,7 +49,7 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.InputStreamBody;
@@ -120,7 +121,7 @@ public class RestClient {
         return ub.build();
     }
 
-    private JSON request(HttpRequestBase req) throws RestException, IOException {
+    private JSON request(HttpRequestBase req) throws RestException, IOException, AuthenticationException {
         req.addHeader("Accept", "application/json");
 
         if (creds != null)
@@ -150,11 +151,18 @@ public class RestClient {
             InputStreamReader isr =  encoding != null ?
                 new InputStreamReader(ent.getContent(), encoding) :
                 new InputStreamReader(ent.getContent());
-            BufferedReader br = new BufferedReader(isr);
-            String line = "";
+            BufferedReader br = null;
 
-            while ((line = br.readLine()) != null)
-                result.append(line);
+            try {
+            	String line = "";
+            	br = new BufferedReader(isr);
+	            while ((line = br.readLine()) != null)
+	                result.append(line);
+            } finally {
+            	if (br != null) {
+            		br.close();
+            	}
+            }
         }
 
         StatusLine sl = resp.getStatusLine();
@@ -166,7 +174,7 @@ public class RestClient {
     }
 
     private JSON request(HttpEntityEnclosingRequestBase req, String payload)
-        throws RestException, IOException {
+        throws RestException, IOException, AuthenticationException {
 
         if (payload != null) {
             StringEntity ent = null;
@@ -174,7 +182,7 @@ public class RestClient {
             try {
                 ent = new StringEntity(payload, "UTF-8");
                 ent.setContentType("application/json");
-            } catch (UnsupportedEncodingException ex) {
+            } catch (UnsupportedCharsetException ex) {
                 /* utf-8 should always be supported... */
             }
 
@@ -186,22 +194,22 @@ public class RestClient {
     }
     
     private JSON request(HttpEntityEnclosingRequestBase req, File file)
-        throws RestException, IOException {
+        throws RestException, IOException, AuthenticationException {
         if (file != null) {
             File fileUpload = file;
             req.setHeader("X-Atlassian-Token", "nocheck");
-            MultipartEntity ent = new MultipartEntity();
+            MultipartEntityBuilder ent = MultipartEntityBuilder.create();
             ent.addPart("file", new FileBody(fileUpload));
-            req.setEntity(ent);
+            req.setEntity(ent.build());
         }
         return request(req);
     }
 
     private JSON request(HttpEntityEnclosingRequestBase req, Issue.NewAttachment... attachments)
-        throws RestException, IOException {
+        throws RestException, IOException, AuthenticationException {
         if (attachments != null) {
             req.setHeader("X-Atlassian-Token", "nocheck");
-            MultipartEntity ent = new MultipartEntity();
+            MultipartEntityBuilder ent = MultipartEntityBuilder.create();
             for(Issue.NewAttachment attachment : attachments) {
                 String filename = attachment.getFilename();
                 Object content = attachment.getContent();
@@ -210,7 +218,7 @@ public class RestClient {
                 } else if (content instanceof InputStream) {
                     ent.addPart("file", new InputStreamBody((InputStream) content, filename));
                 } else if (content instanceof File) {
-                    ent.addPart("file", new FileBody((File) content, filename));
+                    ent.addPart("file", new FileBody((File) content));
                 } else if (content == null) {
                     throw new IllegalArgumentException("Missing content for the file " + filename);
                 } else {
@@ -219,13 +227,13 @@ public class RestClient {
                             content.getClass().getName() + " for the file " + filename);
                 }
             }
-            req.setEntity(ent);
+            req.setEntity(ent.build());
         }
         return request(req);
     }
 
     private JSON request(HttpEntityEnclosingRequestBase req, JSON payload)
-        throws RestException, IOException {
+        throws RestException, IOException, AuthenticationException {
 
         return request(req, payload != null ? payload.toString() : null);
     }
@@ -239,8 +247,9 @@ public class RestClient {
      *
      * @throws RestException when an HTTP-level error occurs
      * @throws IOException when an error reading the response occurs
+     * @throws AuthenticationException 
      */
-    public JSON delete(URI uri) throws RestException, IOException {
+    public JSON delete(URI uri) throws RestException, IOException, AuthenticationException {
         return request(new HttpDelete(uri));
     }
 
@@ -254,8 +263,9 @@ public class RestClient {
      * @throws RestException when an HTTP-level error occurs
      * @throws IOException when an error reading the response occurs
      * @throws URISyntaxException when an error occurred appending the path to the URI
+     * @throws AuthenticationException 
      */
-    public JSON delete(String path) throws RestException, IOException, URISyntaxException {
+    public JSON delete(String path) throws RestException, IOException, URISyntaxException, AuthenticationException {
         return delete(buildURI(path));
     }
 
@@ -268,8 +278,9 @@ public class RestClient {
      *
      * @throws RestException when an HTTP-level error occurs
      * @throws IOException when an error reading the response occurs
+     * @throws AuthenticationException 
      */
-    public JSON get(URI uri) throws RestException, IOException {
+    public JSON get(URI uri) throws RestException, IOException, AuthenticationException {
         return request(new HttpGet(uri));
     }
 
@@ -284,8 +295,9 @@ public class RestClient {
      * @throws RestException when an HTTP-level error occurs
      * @throws IOException when an error reading the response occurs
      * @throws URISyntaxException when an error occurred appending the path to the URI
+     * @throws AuthenticationException 
      */
-    public JSON get(String path, Map<String, String> params) throws RestException, IOException, URISyntaxException {
+    public JSON get(String path, Map<String, String> params) throws RestException, IOException, URISyntaxException, AuthenticationException {
         return get(buildURI(path, params));
     }
 
@@ -299,8 +311,9 @@ public class RestClient {
      * @throws RestException when an HTTP-level error occurs
      * @throws IOException when an error reading the response occurs
      * @throws URISyntaxException when an error occurred appending the path to the URI
+     * @throws AuthenticationException 
      */
-    public JSON get(String path) throws RestException, IOException, URISyntaxException {
+    public JSON get(String path) throws RestException, IOException, URISyntaxException, AuthenticationException {
         return get(path, null);
     }
 
@@ -315,8 +328,9 @@ public class RestClient {
      *
      * @throws RestException when an HTTP-level error occurs
      * @throws IOException when an error reading the response occurs
+     * @throws AuthenticationException 
      */
-    public JSON post(URI uri, JSON payload) throws RestException, IOException {
+    public JSON post(URI uri, JSON payload) throws RestException, IOException, AuthenticationException {
         return request(new HttpPost(uri), payload);
     }
 
@@ -337,8 +351,9 @@ public class RestClient {
      *
      * @throws RestException when an HTTP-level error occurs
      * @throws IOException when an error reading the response occurs
+     * @throws AuthenticationException 
      */
-    public JSON post(URI uri, String payload) throws RestException, IOException {
+    public JSON post(URI uri, String payload) throws RestException, IOException, AuthenticationException {
     	String quoted = null;
     	if(payload != null && !payload.equals(new JSONObject())){
     		quoted = String.format("\"%s\"", payload);
@@ -357,9 +372,10 @@ public class RestClient {
      * @throws RestException when an HTTP-level error occurs
      * @throws IOException when an error reading the response occurs
      * @throws URISyntaxException when an error occurred appending the path to the URI
+     * @throws AuthenticationException 
      */
     public JSON post(String path, JSON payload)
-        throws RestException, IOException, URISyntaxException {
+        throws RestException, IOException, URISyntaxException, AuthenticationException {
 
         return post(buildURI(path), payload);
     }
@@ -374,9 +390,10 @@ public class RestClient {
      * @throws RestException when an HTTP-level error occurs
      * @throws IOException when an error reading the response occurs
      * @throws URISyntaxException when an error occurred appending the path to the URI
+     * @throws AuthenticationException 
      */
     public JSON post(String path)
-        throws RestException, IOException, URISyntaxException {
+        throws RestException, IOException, URISyntaxException, AuthenticationException {
     	
         return post(buildURI(path), new JSONObject());
     }
@@ -390,8 +407,9 @@ public class RestClient {
      * @throws URISyntaxException 
      * @throws IOException 
      * @throws RestException 
+     * @throws AuthenticationException 
      */
-    public JSON post(String path, File file) throws RestException, IOException, URISyntaxException{
+    public JSON post(String path, File file) throws RestException, IOException, URISyntaxException, AuthenticationException{
         return request(new HttpPost(buildURI(path)), file);
     }
 
@@ -404,9 +422,10 @@ public class RestClient {
      * @throws URISyntaxException
      * @throws IOException
      * @throws RestException
+     * @throws AuthenticationException 
      */
     public JSON post(String path, Issue.NewAttachment... attachments)
-        throws RestException, IOException, URISyntaxException
+        throws RestException, IOException, URISyntaxException, AuthenticationException
     {
         return request(new HttpPost(buildURI(path)), attachments);
     }
@@ -421,8 +440,9 @@ public class RestClient {
      *
      * @throws RestException when an HTTP-level error occurs
      * @throws IOException when an error reading the response occurs
+     * @throws AuthenticationException 
      */
-    public JSON put(URI uri, JSON payload) throws RestException, IOException {
+    public JSON put(URI uri, JSON payload) throws RestException, IOException, AuthenticationException {
         return request(new HttpPut(uri), payload);
     }
 
@@ -437,9 +457,10 @@ public class RestClient {
      * @throws RestException when an HTTP-level error occurs
      * @throws IOException when an error reading the response occurs
      * @throws URISyntaxException when an error occurred appending the path to the URI
+     * @throws AuthenticationException 
      */
     public JSON put(String path, JSON payload)
-        throws RestException, IOException, URISyntaxException {
+        throws RestException, IOException, URISyntaxException, AuthenticationException {
 
         return put(buildURI(path), payload);
     }

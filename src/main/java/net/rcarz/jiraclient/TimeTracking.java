@@ -65,6 +65,7 @@ public class TimeTracking {
 
     protected JSONObject toJsonObject() {
         JSONObject object = new JSONObject();
+        
         if (originalEstimate != null)
             object.put("originalEstimate", originalEstimate);
 

@@ -14,12 +14,12 @@ public class RemoteLink extends Resource {
     }
 
     private void deserialise(JSONObject json) {
-        Map map = json;
+        Map<?, ?> map = json;
 
         self = Field.getString(map.get("self"));
         id = Field.getString(map.get("id"));
         
-        Map object = (Map)map.get("object");
+        Map<?, ?> object = (Map<?, ?>)map.get("object");
         
         remoteUrl = Field.getString(object.get("url"));
         title = Field.getString(object.get("title"));

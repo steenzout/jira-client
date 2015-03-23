@@ -31,7 +31,8 @@ import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.auth.AuthenticationException;
+import org.apache.http.impl.client.HttpClientBuilder;
 
 /**
  * A simple JIRA REST client.
@@ -57,9 +58,9 @@ public class JiraClient {
      * @param creds Credentials to authenticate with
      */
     public JiraClient(String uri, ICredentials creds) {
-        DefaultHttpClient httpclient = new DefaultHttpClient();
+    	HttpClientBuilder httpclient = HttpClientBuilder.create();
 
-        restclient = new RestClient(httpclient, creds, URI.create(uri));
+        restclient = new RestClient(httpclient.build(), creds, URI.create(uri));
 
         if (creds != null)
             username = creds.getLogonName();
@@ -559,7 +560,7 @@ public class JiraClient {
     }
 
     private JSON getNextPortion(Issue issue, Integer startAt)
-            throws URISyntaxException, RestException, IOException {
+            throws URISyntaxException, RestException, IOException, AuthenticationException {
 
         Map<String, String> params = new HashMap<String, String>();
         if (startAt != null) {

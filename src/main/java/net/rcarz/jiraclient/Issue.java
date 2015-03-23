@@ -159,7 +159,12 @@ public class Issue extends Resource {
         JSON result = null;
         try {
             Map<String, String> queryParams = new HashMap<String, String>() {
-                {
+                /**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
+
+				{
                     put("jql", j);
                 }
             };
@@ -173,7 +178,7 @@ public class Issue extends Resource {
         if (!(result instanceof JSONObject)) {
             throw new JiraException("JSON payload is malformed");
         }
-        Map map = (Map) result;
+        Map<?, ?> map = (Map<?, ?>) result;
         return Field.getInteger(map.get("total"));
     }
 
@@ -183,7 +188,7 @@ public class Issue extends Resource {
     public final class FluentUpdate {
 
         Map<String, Object> fields = new HashMap<String, Object>();
-        Map<String, List> fieldOpers = new HashMap<String, List>();
+        Map<String, List<Object>> fieldOpers = new HashMap<String, List<Object>>();
         JSONObject editmeta = null;
 
         private FluentUpdate(JSONObject editmeta) {
@@ -207,7 +212,7 @@ public class Issue extends Resource {
                 fieldmap.put(ent.getKey(), newval);
             }
 
-            for (Map.Entry<String, List> ent : fieldOpers.entrySet()) {
+            for (Map.Entry<String, List<Object>> ent : fieldOpers.entrySet()) {
                 Object newval = Field.toJson(ent.getKey(), ent.getValue(), editmeta);
                 updatemap.put(ent.getKey(), newval);
             }
@@ -242,7 +247,7 @@ public class Issue extends Resource {
 
         private FluentUpdate fieldOperation(String oper, String name, Object value) {
             if (!fieldOpers.containsKey(name))
-                fieldOpers.put(name, new ArrayList());
+                fieldOpers.put(name, new ArrayList<Object>());
 
             fieldOpers.get(name).add(new Field.Operation(oper, value));
             return this;
@@ -438,7 +443,7 @@ public class Issue extends Resource {
     }
 
     private String key = null;
-    private Map fields = null;
+    private Map<?, ?> fields = null;
 
     /* system fields */
     private User assignee = null;
@@ -485,13 +490,13 @@ public class Issue extends Resource {
     }
 
     private void deserialise(JSONObject json) {
-        Map map = json;
+        Map<?, ?> map = json;
 
         id = Field.getString(map.get("id"));
         self = Field.getString(map.get("self"));
         key = Field.getString(map.get("key"));
 
-        fields = (Map)map.get("fields");
+        fields = (Map<?, ?>)map.get("fields");
 
         assignee = Field.getResource(User.class, fields.get(Field.ASSIGNEE), restclient);
         attachments = Field.getResourceArray(Attachment.class, fields.get(Field.ATTACHMENT), restclient);
@@ -538,7 +543,12 @@ public class Issue extends Resource {
         try {
             URI createuri = restclient.buildURI(
                 getBaseUri() + "issue/createmeta",
-                new HashMap<String, String>() {{
+                new HashMap<String, String>() {/**
+					 * 
+					 */
+					private static final long serialVersionUID = 1L;
+
+				{
                     put("expand", "projects.issuetypes.fields");
                     put("projectKeys", pval);
                     put("issuetypeNames", itval);
@@ -596,7 +606,12 @@ public class Issue extends Resource {
         try {
             URI transuri = restclient.buildURI(
                 getRestUri(key) + "/transitions",
-                new HashMap<String, String>() {{
+                new HashMap<String, String>() {/**
+					 * 
+					 */
+					private static final long serialVersionUID = 1L;
+
+				{
                     put("expand", "transitions.fields");
                 }});
             result = restclient.get(transuri);
@@ -894,7 +909,12 @@ public class Issue extends Resource {
             throws JiraException {
 
         Map<String, String> queryParams = new HashMap<String, String>() {
-            {
+            /**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			{
                 put("fields", includedFields);
             }
         };
@@ -928,7 +948,12 @@ public class Issue extends Resource {
             final String expand) throws JiraException {
 
         Map<String, String> queryParams = new HashMap<String, String>() {
-            {
+            /**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			{
                 put("fields", includedFields);
                 if (expand != null) {
                     put("expand", expand);
@@ -1023,7 +1048,12 @@ public class Issue extends Resource {
 
         try {
             Map<String, String> queryParams = new HashMap<String, String>() {
-                {
+                /**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
+
+				{
                     put("jql", j);
                 }
             };
@@ -1051,7 +1081,7 @@ public class Issue extends Resource {
         }
 
         SearchResult sr = new SearchResult();
-        Map map = (Map) result;
+        Map<?, ?> map = (Map<?, ?>) result;
 
         sr.start = Field.getInteger(map.get("startAt"));
         sr.max = Field.getInteger(map.get("maxResults"));
@@ -1091,7 +1121,12 @@ public class Issue extends Resource {
     public void refresh(final String includedFields) throws JiraException {
 
         Map<String, String> queryParams = new HashMap<String, String>() {
-            {
+            /**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			{
                 put("fields", includedFields);
             }
         };
@@ -1193,7 +1228,12 @@ public class Issue extends Resource {
             final String u = username;
             URI uri = restclient.buildURI(
                 getRestUri(key) + "/watchers",
-                new HashMap<String, String>() {{
+                new HashMap<String, String>() {/**
+					 * 
+					 */
+					private static final long serialVersionUID = 1L;
+
+				{
                     put("username", u);
                 }});
             restclient.delete(uri);

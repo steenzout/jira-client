@@ -26,7 +26,12 @@ import java.lang.Throwable;
  */
 public class JiraException extends Exception {
 
-    public JiraException(String msg) {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public JiraException(String msg) {
         super(msg);
     }
 

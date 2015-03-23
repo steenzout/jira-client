@@ -67,7 +67,7 @@ public abstract class GreenHopperIssue extends GreenHopperResource {
     }
 
     private void deserialise(JSONObject json) {
-        Map map = json;
+        Map<?, ?> map = json;
 
         id = Field.getInteger(map.get("id"));
         key = Field.getString(map.get("key"));

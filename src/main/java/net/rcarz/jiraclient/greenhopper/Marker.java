@@ -47,7 +47,7 @@ public class Marker extends GreenHopperResource {
     }
 
     private void deserialise(JSONObject json) {
-        Map map = json;
+        Map<?, ?> map = json;
 
         id = Field.getInteger(map.get("id"));
         name = Field.getString(map.get("name"));

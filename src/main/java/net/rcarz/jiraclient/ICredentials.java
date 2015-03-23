@@ -20,6 +20,7 @@
 package net.rcarz.jiraclient;
 
 import org.apache.http.HttpRequest;
+import org.apache.http.auth.AuthenticationException;
 
 public interface ICredentials {
 
@@ -28,8 +29,9 @@ public interface ICredentials {
      * Sets the Authorization header for the given request.
      *
      * @param req HTTP request to authenticate
+     * @throws AuthenticationException 
      */
-    void authenticate(HttpRequest req);
+    void authenticate(HttpRequest req) throws AuthenticationException;
 
     /**
      * Gets the logon name representing these credentials.

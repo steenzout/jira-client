@@ -48,7 +48,7 @@ public class SprintIssue extends GreenHopperIssue {
     }
 
     private void deserialise(JSONObject json) {
-        Map map = json;
+        Map<?, ?> map = json;
 
         epic = Field.getString(map.get("epic"));
         estimateStatistic = GreenHopperField.getEstimateStatistic(map.get("estimateStatistic"));
