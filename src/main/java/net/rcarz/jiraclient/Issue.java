@@ -37,12 +37,26 @@ import net.sf.json.JSONObject;
  */
 public class Issue extends Resource {
 
+	public static abstract class AbstractFluent {
+		Map<String, Object> fields = new HashMap<String, Object>();
+		
+		/**
+         * Appends a field to the update action.
+         *
+         * @param name Name of the field
+         * @param value New field value
+         *
+         * @return the current fluent update instance
+         */
+        public void field(String name, Object value) {
+            fields.put(name, value);
+        }
+	}
     /**
      * Used to chain fields to a create action.
      */
-    public static final class FluentCreate {
-
-        Map<String, Object> fields = new HashMap<String, Object>();
+    public static final class FluentCreate extends AbstractFluent {
+    	
         RestClient restclient = null;
         JSONObject createmeta = null;
 
@@ -128,66 +142,13 @@ public class Issue extends Resource {
                 return Issue.get(restclient, (String) ((JSONObject) result).get("key"));
             }
         }
-
-        /**
-         * Appends a field to the update action.
-         *
-         * @param name Name of the field
-         * @param value New field value
-         *
-         * @return the current fluent update instance
-         */
-        public FluentCreate field(String name, Object value) {
-            fields.put(name, value);
-            return this;
-        }
-    }
-
-    /**
-     * count issues with the given query.
-     *
-     * @param restclient REST client instance
-     *
-     * @param jql JQL statement
-     *
-     * @return the count
-     *
-     * @throws JiraException when the search fails
-     */
-    public static int count(RestClient restclient, String jql) throws JiraException {
-        final String j = jql;
-        JSON result = null;
-        try {
-            Map<String, String> queryParams = new HashMap<String, String>() {
-                /**
-				 * 
-				 */
-				private static final long serialVersionUID = 1L;
-
-				{
-                    put("jql", j);
-                }
-            };
-            queryParams.put("maxResults", "1");
-            URI searchUri = restclient.buildURI(getBaseUri() + "search", queryParams);
-            result = restclient.get(searchUri);
-        } catch (Exception ex) {
-            throw new JiraException("Failed to search issues", ex);
-        }
-
-        if (!(result instanceof JSONObject)) {
-            throw new JiraException("JSON payload is malformed");
-        }
-        Map<?, ?> map = (Map<?, ?>) result;
-        return Field.getInteger(map.get("total"));
     }
 
     /**
      * Used to chain fields to an update action.
      */
-    public final class FluentUpdate {
+    public final class FluentUpdate extends AbstractFluent {
 
-        Map<String, Object> fields = new HashMap<String, Object>();
         Map<String, List<Object>> fieldOpers = new HashMap<String, List<Object>>();
         JSONObject editmeta = null;
 
@@ -232,19 +193,6 @@ public class Issue extends Resource {
             }
         }
 
-        /**
-         * Appends a field to the update action.
-         *
-         * @param name Name of the field
-         * @param value New field value
-         *
-         * @return the current fluent update instance
-         */
-        public FluentUpdate field(String name, Object value) {
-            fields.put(name, value);
-            return this;
-        }
-
         private FluentUpdate fieldOperation(String oper, String name, Object value) {
             if (!fieldOpers.containsKey(name))
                 fieldOpers.put(name, new ArrayList<Object>());
@@ -281,9 +229,8 @@ public class Issue extends Resource {
     /**
      * Used to chain fields to a transition action.
      */
-    public final class FluentTransition {
+    public final class FluentTransition extends AbstractFluent {
 
-        Map<String, Object> fields = new HashMap<String, Object>();
         List<Transition> transitions = null;
 
         private FluentTransition(List<Transition> transitions) {
@@ -366,21 +313,8 @@ public class Issue extends Resource {
         public void execute(String name) throws JiraException {
             realExecute(getTransition(name, true));
         }
-
-        /**
-         * Appends a field to the transition action.
-         *
-         * @param name Name of the field
-         * @param value New field value
-         *
-         * @return the current fluent transition instance
-         */
-        public FluentTransition field(String name, Object value) {
-            fields.put(name, value);
-            return this;
-        }
     }
-
+    
     /**
      * Issue search results structure.
      */
@@ -529,6 +463,45 @@ public class Issue extends Resource {
         updatedDate = Field.getDateTime(fields.get(Field.UPDATED_DATE));
     }
 
+    /**
+     * count issues with the given query.
+     *
+     * @param restclient REST client instance
+     *
+     * @param jql JQL statement
+     *
+     * @return the count
+     *
+     * @throws JiraException when the search fails
+     */
+    public static int count(RestClient restclient, String jql) throws JiraException {
+        final String j = jql;
+        JSON result = null;
+        try {
+            Map<String, String> queryParams = new HashMap<String, String>() {
+                /**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
+
+				{
+                    put("jql", j);
+                }
+            };
+            queryParams.put("maxResults", "1");
+            URI searchUri = restclient.buildURI(getBaseUri() + "search", queryParams);
+            result = restclient.get(searchUri);
+        } catch (Exception ex) {
+            throw new JiraException("Failed to search issues", ex);
+        }
+
+        if (!(result instanceof JSONObject)) {
+            throw new JiraException("JSON payload is malformed");
+        }
+        Map<?, ?> map = (Map<?, ?>) result;
+        return Field.getInteger(map.get("total"));
+    }
+    
     private static String getRestUri(String key) {
         return getBaseUri() + "issue/" + (key != null ? key : "");
     }
@@ -828,13 +801,13 @@ public class Issue extends Resource {
     public static FluentCreate create(RestClient restclient, String project, String issueType)
         throws JiraException {
 
-        FluentCreate fc = new FluentCreate(
-            restclient,
+        FluentCreate fc = new FluentCreate(restclient,
             getCreateMetadata(restclient, project, issueType));
 
-        return fc
-            .field(Field.PROJECT, project)
-            .field(Field.ISSUE_TYPE, issueType);
+        fc.field(Field.PROJECT, project);
+        fc.field(Field.ISSUE_TYPE, issueType);
+        
+        return fc;
     }
 
     /**
@@ -844,9 +817,22 @@ public class Issue extends Resource {
      *
      * @throws JiraException when the client fails to retrieve issue metadata
      */
+    public FluentCreate createSubtask(String issueType) throws JiraException {
+    	FluentCreate fc = Issue.create(restclient, getProject().getKey(), issueType);
+    	fc.field(Field.PARENT, getKey());
+    	
+    	return fc;
+    }
+    
+    /**
+     * Creates a new sub-task.
+     *
+     * @return a fluent create instance
+     *
+     * @throws JiraException when the client fails to retrieve issue metadata
+     */
     public FluentCreate createSubtask() throws JiraException {
-        return Issue.create(restclient, getProject().getKey(), "Sub-task")
-                .field(Field.PARENT, getKey());
+    	return createSubtask("Sub-task");
     }
 
     private static JSONObject realGet(RestClient restclient, String key, Map<String, String> queryParams)
@@ -918,6 +904,7 @@ public class Issue extends Resource {
                 put("fields", includedFields);
             }
         };
+        
         return new Issue(restclient, realGet(restclient, key, queryParams));
     }
 
@@ -960,6 +947,7 @@ public class Issue extends Resource {
                 }
             }
         };
+        
         return new Issue(restclient, realGet(restclient, key, queryParams));
     }
 
@@ -1130,6 +1118,7 @@ public class Issue extends Resource {
                 put("fields", includedFields);
             }
         };
+        
         JSONObject result = realGet(restclient, key, queryParams);
         deserialise(result);
     }
@@ -1142,7 +1131,6 @@ public class Issue extends Resource {
      * @return the field value or null if not found
      */
     public Object getField(String name) {
-
         return fields != null ? fields.get(name) : null;
     }
 
@@ -1396,6 +1384,5 @@ public class Issue extends Resource {
     public Date getUpdatedDate() {
         return updatedDate;
     }
-
 }
 

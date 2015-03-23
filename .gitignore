@@ -8,3 +8,5 @@ work/
 .idea/
 *.iml
 /bin/
+
+build/jira-client.jar
