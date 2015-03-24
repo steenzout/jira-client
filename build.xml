@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="create_jar" name="jira-client">
+    
+	<target name="prepare">
+		
+	    <property name="project-name" value="${ant.project.name}" />
+		
+	    <tstamp prefix="build-info">
+			<format property="current-date" pattern="yyyy-MM-dd" locale="en" />
+			<format property="current-time" pattern="hh:mm:ss a z" locale="en" />
+		</tstamp>
+		
+	</target>
+	    
+    <target name="create_jar" depends="prepare">
+        
+        <jar destfile="lib/${project-name}.jar">
+            <manifest>
+				<attribute name="Built-On" value="${build-info.current-date}" />
+				<attribute name="Built-At" value="${build-info.current-time}" />
+            </manifest>
+            
+            <fileset dir="bin/main"/>
+        </jar>
+
+    </target>
+    
+</project>
